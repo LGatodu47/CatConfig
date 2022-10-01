@@ -1,0 +1,97 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group 'io.github.lgatodu47'
+archivesBaseName = project.lib_name
+version project.version
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:23.0.0'
+    implementation group: 'com.google.code.gson', name: 'gson', version: "${gson_version}"
+    implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    implementation 'it.unimi.dsi:fastutil:8.5.8'
+    implementation 'com.google.guava:guava:31.1-jre'
+}
+
+jar {
+    libsDirName = "libs/${version}"
+}
+
+task javadocJar(type: Jar) {
+    classifier 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        catconfig(MavenPublication) {
+            from components.java
+            artifact javadocJar
+            artifact sourcesJar
+
+            pom {
+                name = 'CatConfig'
+                description = 'Config File handling library'
+                url = 'https://github.com/LGatodu47/CatConfig'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = "https://www.opensource.org/licenses/mit-license.php"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:https://github.com/LGatodu47/CatConfig.git"
+                    developerConnection = "scm:git:ssh://github.com/LGatodu47/CatConfig.git"
+                    url = "https://github.com/LGatodu47/CatConfig"
+                }
+
+                developers {
+                    developer {
+                        id = 'lgatodu47'
+                        name = 'LGatodu47'
+                        email = 'driph.v450@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "Local"
+            url layout.buildDirectory.dir("repo")
+        }
+        maven {
+            name = "GithubPackages"
+            url = uri('https://maven.pkg.github.com/lgatodu47/CatConfig')
+
+            credentials {
+                username project.findProperty("gpr.user") ?: System.getProperty("catconfig.publish.username")
+                password project.findProperty("gpr.key") ?: System.getProperty("catconfig.publish.token")
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.catconfig
+}
