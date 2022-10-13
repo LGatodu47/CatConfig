@@ -81,12 +81,12 @@ publishing {
             url layout.buildDirectory.dir("repo")
         }
         maven {
-            name = "GithubPackages"
-            url = uri('https://maven.pkg.github.com/lgatodu47/CatConfig')
+            name = "OSSRH"
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2'
 
             credentials {
-                username project.findProperty("gpr.user") ?: System.getProperty("catconfig.publish.username")
-                password project.findProperty("gpr.key") ?: System.getProperty("catconfig.publish.token")
+                username System.getProperty("catconfig.publish.username")
+                password System.getProperty("catconfig.publish.password")
             }
         }
     }

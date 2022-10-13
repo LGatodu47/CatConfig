@@ -7,14 +7,14 @@ Cat Config
 
 ### What is Cat Config ?
 Cat Config is a Java library with a whole config system. To implement it in your project, you first need
-to obtain the artifacts located on the maven repository at `https://maven.pkg.github.com/lgatodu47/CatConfig`.
+to obtain the artifacts located on the maven central repository or at
+`https://s01.oss.sonatype.org/content/repositories/releases`.
 You can find them at the domain `io.github.lgatodu47:cat-config`. Here is an example at what you would
 have in your build.gradle:
 
     repositories {
         maven {
-            name 'Cat Config'
-            url 'https://maven.pkg.github.com/lgatodu47/CatConfig'
+            url 'https://s01.oss.sonatype.org/content/repositories/releases'
         }
     }
 
