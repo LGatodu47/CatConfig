@@ -8,10 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-
-import static io.github.lgatodu47.catconfig.Util.clamp;
 
 /**
  * An interface used to build your config options. It is design so that you can declare them statically
@@ -20,14 +19,14 @@ import static io.github.lgatodu47.catconfig.Util.clamp;
  *     private static final ConfigOptionBuilder BUILDER = {@link ConfigOptionBuilder#create() ConfigOptionBuilder.create()};
  *     public static final ConfigOptionAccess OPTIONS = BUILDER;
  *     static {
- *         {@link ConfigOptionBuilder#onSide(ConfigSide) BUILDER.onSide}(~Side A~);
+ *         {@link ConfigOptionBuilder#onSides(ConfigSide...) BUILDER.onSides}(MySides.SIDE_A);
  *     }
- *     public static final ConfigOption&#60Boolean&#62 BOOLEAN_OPTION = {@link ConfigOptionBuilder#createBool(String, Boolean) BUILDER.createBool}("boolean_option", false);
+ *     public static final ConfigOption&lt;Boolean&gt; BOOLEAN_OPTION = {@link ConfigOptionBuilder#createBool(String, Boolean) BUILDER.createBool}("boolean_option", false);
  *     static {
- *         {@link ConfigOptionBuilder#onSide(ConfigSide) BUILDER.onSide}(~Side B~);
+ *         {@link ConfigOptionBuilder#onSides(ConfigSide...) BUILDER.onSides}(MySides.SIDE_B);
  *     }
- *     public static final ConfigOption&#60Integer&#62 INTEGER_OPTION = {@link ConfigOptionBuilder#createInt(String, Integer, int, int) BUILDER.createInt}("integer_option", null, 2, 8);
- *     public static final ConfigOption&#60Long&#62 LONG_OPTION = {@link ConfigOptionBuilder#createLong(ConfigSide, String, Long) BUILDER.createLong}(~Side C~, "long_option", 30L);
+ *     public static final ConfigOption&lt;Integer&gt; INTEGER_OPTION = {@link ConfigOptionBuilder#createInt(String, Integer, int, int) BUILDER.createInt}("integer_option", null, 2, 8);
+ *     public static final ConfigOption&lt;Long&gt; LONG_OPTION = {@link ConfigOptionBuilder#createLong(ConfigSideArray, String, Long) BUILDER.createLong}({@link ConfigSideArray#of(ConfigSide...) ConfigSideArray.of(MySides.SIDE_C)}, "long_option", 30L);
  * </pre>
  * In the example above, we create a new ConfigOptionManager using the {@link ConfigOptionBuilder#create()} method.<br>
  * We also downcast the builder we just created to a ConfigOptionAccess instance that will allow getting our options by their name and side.<br>
@@ -37,7 +36,10 @@ import static io.github.lgatodu47.catconfig.Util.clamp;
  * After that we change the side of the builder to the 'Side B'.<br>
  * The next option, 'INTEGER_OPTION' is therefore defined for the 'Side B'.<br>
  * However, the third option named 'LONG_OPTION', is not assigned to 'Side B' but 'Side C' as it is specified
- * on the call of the method {@link ConfigOptionBuilder#createLong(ConfigSide, String, Long)}.
+ * on the call of the method {@link ConfigOptionBuilder#createLong(ConfigSideArray, String, Long)}.<br>
+ * <br>
+ * <strong>NOTE</strong>: Since 0.2, you can now assign multiple sides to a builder, useful when options are sometimes defined on two sides
+ * at the same time (Client and Common for example).
  */
 public interface ConfigOptionBuilder extends ConfigOptionAccess {
     /**
@@ -52,117 +54,130 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
      * @return The side that is currently assigned to this builder.
      */
     @Nullable
-    ConfigSide currentSide();
+    ConfigSideArray currentSides();
 
     /**
      * Sets the current side of this builder to the given side.
      * @param side The new side of the builder.
      */
-    void onSide(@Nullable ConfigSide side);
+    void onSides(@Nullable ConfigSide... side);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @return A freshly new created boolean config option.
      */
-    ConfigOption<Boolean> createBool(@NotNull ConfigSide side, String name, @Nullable Boolean defaultValue);
+    ConfigOption<Boolean> createBool(@NotNull ConfigSideArray sides, String name, @Nullable Boolean defaultValue);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @param min The minimum value (inclusive) that this option can take.
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created integer config option.
      */
-    ConfigOption<Integer> createInt(@NotNull ConfigSide side, String name, @Nullable Integer defaultValue, int min, int max);
+    ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @param min The minimum value (inclusive) that this option can take.
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created long config option.
      */
-    ConfigOption<Long> createLong(@NotNull ConfigSide side, String name, @Nullable Long defaultValue, long min, long max);
+    ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @param min The minimum value (inclusive) that this option can take.
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created double config option.
      */
-    ConfigOption<Double> createDouble(@NotNull ConfigSide side, String name, @Nullable Double defaultValue, double min, double max);
+    ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @return A freshly new created string config option.
      */
-    ConfigOption<String> createString(@NotNull ConfigSide side, String name, @Nullable String defaultValue);
+    ConfigOption<String> createString(@NotNull ConfigSideArray sides, String name, @Nullable String defaultValue);
 
     /**
-     * @param side The config side of the config option to create.
+     * @param sides The config sides of the config option to create.
      * @param name The name of the option.
      * @param enumClass The class of the enum that the option will hold.
      * @param defaultValue The default value for the option. Leave to null for none.
      * @param <E> The type of the enum.
      * @return A freshly new created enum config option.
      */
-    <E extends Enum<E>> ConfigOption<E> createEnum(@NotNull ConfigSide side, String name, Class<E> enumClass, @Nullable E defaultValue);
+    <E extends Enum<E>> ConfigOption<E> createEnum(@NotNull ConfigSideArray sides, String name, Class<E> enumClass, @Nullable E defaultValue);
+
+    /**
+     * Adds a config option to the list of config options.
+     * @param sides The sides of the config option.
+     * @param option The config option to add.
+     * @return The config option passed previously as argument.
+     * @param <O> The type of the option.
+     */
+    <O extends ConfigOption<?>> O put(@NotNull ConfigSideArray sides, O option);
 
     // delegate methods following
     default ConfigOption<Boolean> createBool(String name, @Nullable Boolean defaultValue) {
-        return createBool(Objects.requireNonNull(currentSide()), name, defaultValue);
+        return createBool(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Integer> createInt(@NotNull ConfigSide side, String name, @Nullable Integer defaultValue) {
-        return createInt(side, name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    default ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue) {
+        return createInt(sides, name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
     default ConfigOption<Integer> createInt(String name, @Nullable Integer defaultValue, int min, int max) {
-        return createInt(Objects.requireNonNull(currentSide()), name, defaultValue, min, max);
+        return createInt(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
     default ConfigOption<Integer> createInt(String name, @Nullable Integer defaultValue) {
-        return createInt(Objects.requireNonNull(currentSide()), name, defaultValue);
+        return createInt(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Long> createLong(@NotNull ConfigSide side, String name, @Nullable Long defaultValue) {
-        return createLong(side, name, defaultValue, Long.MIN_VALUE, Long.MAX_VALUE);
+    default ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue) {
+        return createLong(sides, name, defaultValue, Long.MIN_VALUE, Long.MAX_VALUE);
     }
 
     default ConfigOption<Long> createLong(String name, @Nullable Long defaultValue, long min, long max) {
-        return createLong(Objects.requireNonNull(currentSide()), name, defaultValue, min, max);
+        return createLong(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
     default ConfigOption<Long> createLong(String name, @Nullable Long defaultValue) {
-        return createLong(Objects.requireNonNull(currentSide()), name, defaultValue);
+        return createLong(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Double> createDouble(@NotNull ConfigSide side, String name, @Nullable Double defaultValue) {
-        return createDouble(side, name, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE);
+    default ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue) {
+        return createDouble(sides, name, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     default ConfigOption<Double> createDouble(String name, @Nullable Double defaultValue, double min, double max) {
-        return createDouble(Objects.requireNonNull(currentSide()), name, defaultValue, min, max);
+        return createDouble(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
     default ConfigOption<Double> createDouble(String name, @Nullable Double defaultValue) {
-        return createDouble(Objects.requireNonNull(currentSide()), name, defaultValue);
+        return createDouble(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
     default ConfigOption<String> createString(String name, @Nullable String defaultValue) {
-        return createString(Objects.requireNonNull(currentSide()), name, defaultValue);
+        return createString(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
     default <E extends Enum<E>> ConfigOption<E> createEnum(String name, Class<E> enumClass, @Nullable E defaultValue) {
-        return createEnum(Objects.requireNonNull(currentSide()), name, enumClass, defaultValue);
+        return createEnum(Objects.requireNonNull(currentSides()), name, enumClass, defaultValue);
+    }
+
+    default<O extends ConfigOption<?>> O put(O option) {
+        return put(Objects.requireNonNull(currentSides()), option);
     }
 
     /**
@@ -174,7 +189,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
          */
         private final Table<ConfigSide, String, ConfigOption<?>> bySideAndName = HashBasedTable.create();
         @Nullable
-        private ConfigSide currentSide;
+        private ConfigSideArray currentSides;
 
         @Override
         public ConfigOption<?> get(ConfigSide side, String name) {
@@ -187,47 +202,52 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
         }
 
         @Override
-        public @Nullable ConfigSide currentSide() {
-            return currentSide;
+        public @Nullable ConfigSideArray currentSides() {
+            return currentSides;
         }
 
         @Override
-        public void onSide(@Nullable ConfigSide side) {
-            this.currentSide = side;
+        public void onSides(@Nullable ConfigSide... sides) {
+            if(sides != null) {
+                this.currentSides = ConfigSideArray.of(Arrays.stream(sides).filter(Objects::nonNull).toArray(ConfigSide[]::new));
+            }
         }
 
         @Override
-        public ConfigOption<Boolean> createBool(@NotNull ConfigSide side, String name, @Nullable Boolean defaultValue) {
-            return put(side, new BooleanOption(name, defaultValue));
+        public ConfigOption<Boolean> createBool(@NotNull ConfigSideArray sides, String name, @Nullable Boolean defaultValue) {
+            return put(sides, new BooleanOption(name, defaultValue));
         }
 
         @Override
-        public ConfigOption<Integer> createInt(@NotNull ConfigSide side, String name, @Nullable Integer defaultValue, int min, int max) {
-            return put(side, new IntOption(name, defaultValue, min, max));
+        public ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max) {
+            return put(sides, new IntOption(name, defaultValue, min, max));
         }
 
         @Override
-        public ConfigOption<Long> createLong(@NotNull ConfigSide side, String name, @Nullable Long defaultValue, long min, long max) {
-            return put(side, new LongOption(name, defaultValue, min, max));
+        public ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max) {
+            return put(sides, new LongOption(name, defaultValue, min, max));
         }
 
         @Override
-        public ConfigOption<Double> createDouble(@NotNull ConfigSide side, String name, @Nullable Double defaultValue, double min, double max) {
-            return put(side, new DoubleOption(name, defaultValue, min, max));
+        public ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max) {
+            return put(sides, new DoubleOption(name, defaultValue, min, max));
         }
 
         @Override
-        public ConfigOption<String> createString(@NotNull ConfigSide side, String name, @Nullable String defaultValue) {
-            return put(side, new StringOption(name, defaultValue));
+        public ConfigOption<String> createString(@NotNull ConfigSideArray sides, String name, @Nullable String defaultValue) {
+            return put(sides, new StringOption(name, defaultValue));
         }
 
         @Override
-        public <E extends Enum<E>> ConfigOption<E> createEnum(@NotNull ConfigSide side, String name, Class<E> enumClass, @Nullable E defaultValue) {
-            return put(side, new EnumOption<>(name, enumClass, defaultValue));
+        public <E extends Enum<E>> ConfigOption<E> createEnum(@NotNull ConfigSideArray sides, String name, Class<E> enumClass, @Nullable E defaultValue) {
+            return put(sides, new EnumOption<>(name, enumClass, defaultValue));
         }
 
-        private <O extends ConfigOption<?>> O put(ConfigSide side, O option) {
-            bySideAndName.put(side, option.name(), option);
+        @Override
+        public <O extends ConfigOption<?>> O put(@NotNull ConfigSideArray sides, O option) {
+            for (ConfigSide side : sides.sides()) {
+                bySideAndName.put(side, option.name(), option);
+            }
             return option;
         }
 
@@ -247,13 +267,9 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
             }
         }
 
-        private static class IntOption extends AbstractOption<Integer> {
-            private final int min, max;
-
-            private IntOption(String name, @Nullable Integer defaultValue, int min, int max) {
-                super(name, defaultValue);
-                this.min = min;
-                this.max = max;
+        private static class IntOption extends AbstractNumberOption<Integer> {
+            private IntOption(String name, @Nullable Integer defaultValue, @Nullable Integer min, @Nullable Integer max) {
+                super(name, defaultValue, min, max);
             }
 
             @Override
@@ -263,17 +279,23 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
 
             @Override
             public Integer read(JsonReader reader) throws IOException {
-                return clamp(reader.nextInt(), min, max);
+                Integer min = min();
+                Integer max = max();
+
+                int val = reader.nextInt();
+                if(min != null) {
+                    val = Math.max(val, min);
+                }
+                if(max != null) {
+                    val = Math.min(val, max);
+                }
+                return val;
             }
         }
 
-        private static class LongOption extends AbstractOption<Long> {
-            private final long min, max;
-
-            private LongOption(String name, @Nullable Long defaultValue, long min, long max) {
-                super(name, defaultValue);
-                this.min = min;
-                this.max = max;
+        private static class LongOption extends AbstractNumberOption<Long> {
+            private LongOption(String name, @Nullable Long defaultValue, @Nullable Long min, @Nullable Long max) {
+                super(name, defaultValue, min, max);
             }
 
             @Override
@@ -283,17 +305,23 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
 
             @Override
             public Long read(JsonReader reader) throws IOException {
-                return clamp(reader.nextLong(), min, max);
+                Long min = min();
+                Long max = max();
+
+                long val = reader.nextInt();
+                if(min != null) {
+                    val = Math.max(val, min);
+                }
+                if(max != null) {
+                    val = Math.min(val, max);
+                }
+                return val;
             }
         }
 
-        private static class DoubleOption extends AbstractOption<Double> {
-            private final double min, max;
-
-            private DoubleOption(String name, @Nullable Double defaultValue, double min, double max) {
-                super(name, defaultValue);
-                this.min = min;
-                this.max = max;
+        private static class DoubleOption extends AbstractNumberOption<Double> {
+            private DoubleOption(String name, @Nullable Double defaultValue, @Nullable Double min, @Nullable Double max) {
+                super(name, defaultValue, min, max);
             }
 
             @Override
@@ -303,7 +331,17 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
 
             @Override
             public Double read(JsonReader reader) throws IOException {
-                return clamp(reader.nextDouble(), min, max);
+                Double min = min();
+                Double max = max();
+
+                double val = reader.nextInt();
+                if(min != null) {
+                    val = Math.max(val, min);
+                }
+                if(max != null) {
+                    val = Math.min(val, max);
+                }
+                return val;
             }
         }
 
@@ -339,6 +377,27 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
             @Override
             public E read(JsonReader reader) throws IOException {
                 return Enum.valueOf(enumClass, reader.nextString());
+            }
+        }
+
+        private static abstract class AbstractNumberOption<N extends Number> extends AbstractOption<N> implements ConfigOption.NumberOption<N> {
+            @Nullable
+            private final N min, max;
+
+            private AbstractNumberOption(String name, @Nullable N defaultValue, @Nullable N min, @Nullable N max) {
+                super(name, defaultValue);
+                this.min = min;
+                this.max = max;
+            }
+
+            @Override
+            public @Nullable N min() {
+                return min;
+            }
+
+            @Override
+            public @Nullable N max() {
+                return max;
             }
         }
 

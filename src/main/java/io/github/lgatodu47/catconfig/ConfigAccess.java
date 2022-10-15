@@ -7,6 +7,7 @@ import java.util.Optional;
 
 /**
  * Interface that allows access to config values by their options.
+ * @see CatConfig CatConfig for implementation details.
  */
 public interface ConfigAccess {
     /**

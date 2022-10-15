@@ -19,12 +19,13 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jetbrains:annotations:23.0.0'
-    implementation group: 'com.google.code.gson', name: 'gson', version: "${gson_version}"
-    implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
-    implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
-    implementation 'it.unimi.dsi:fastutil:8.5.8'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation "org.jetbrains:annotations:${annotations_version}"
+    implementation "com.google.code.gson:gson:${gson_version}"
+    implementation "it.unimi.dsi:fastutil:${fastutil_version}"
+    implementation "com.google.guava:guava:${guava_version}"
+
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.19.0'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.19.0'
 }
 
 jar {

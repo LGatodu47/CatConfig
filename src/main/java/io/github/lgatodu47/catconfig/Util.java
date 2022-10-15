@@ -3,6 +3,8 @@ package io.github.lgatodu47.catconfig;
 /**
  * Utility class (package-private because too many classes are named 'Util').
  */
+// In 0.2 this class with its methods aren't used. It may be useful in the future so for now I'll leave it.
+@SuppressWarnings("unused")
 class Util {
     /**
      * @param value The value to clamp.

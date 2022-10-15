@@ -5,8 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.FormattedMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,10 +26,13 @@ public abstract class CatConfig implements ConfigAccess {
      */
     protected final Object lock = new Object();
     protected final ConfigSide side;
-    protected final Logger logger;
+    protected final CatConfigLogger logger;
     protected final ConfigOptionAccess options;
     protected final ConfigValueMap valueMap;
+    protected final Path configFilePath;
     protected final File configFile;
+    @Nullable
+    protected final Thread watcherThread;
     protected boolean ignoreNextRead;
     protected boolean needsUpdate;
 
@@ -39,17 +40,17 @@ public abstract class CatConfig implements ConfigAccess {
      * Basic constructor for the config object.
      *
      * @param side The side of the config.
-     * @param configDir The directory where the config will be created.
+     * @param configName The name of the config (and more generally of the software creating it).
      * @param logger The logger for this config object.
      */
-    public CatConfig(ConfigSide side, Path configDir, Logger logger) {
+    public CatConfig(ConfigSide side, String configName, CatConfigLogger logger) {
         this.side = side;
         this.logger = logger;
         this.options = getConfigOptions();
         this.valueMap = createValueMap();
-        Path configPath = makeConfigPath(configDir);
-        new ConfigWatcher(configPath);
-        this.configFile = configPath.toFile();
+        this.configFilePath = makeConfigPath(configName);
+        this.watcherThread = makeAndStartConfigWatcherThread();
+        this.configFile = configFilePath.toFile();
         readFromFile();
     }
 
@@ -81,7 +82,7 @@ public abstract class CatConfig implements ConfigAccess {
                         configFile.createNewFile();
                     }
                 } catch (IOException e) {
-                    logger.error(new FormattedMessage("Failed to create {} config file.", side.sideName()), e);
+                    logger.error("Failed to create {} config file.", e, side.sideName());
                     return;
                 }
             }
@@ -96,7 +97,7 @@ public abstract class CatConfig implements ConfigAccess {
                 ignoreNextRead = true;
                 needsUpdate = false;
             } catch (Throwable t) {
-                logger.error(new FormattedMessage("Unable to write {} config to file!", side.sideName()), t);
+                logger.error("Unable to write {} config to file!", t, side.sideName());
             }
         }
     }
@@ -154,7 +155,7 @@ public abstract class CatConfig implements ConfigAccess {
                 needsUpdate = false;
             } catch (FileNotFoundException ignored) {
             } catch (Throwable t) {
-                logger.error(new FormattedMessage("Unable to read {} config from file!", side.sideName()), t);
+                logger.error("Unable to read {} config from file!", t, side.sideName());
             }
         }
     }
@@ -174,29 +175,41 @@ public abstract class CatConfig implements ConfigAccess {
     }
 
     /**
-     * @param configDir The config directory.
+     * @return A path representing the directory where config files should be created.
+     */
+    @NotNull
+    protected abstract Path getConfigDirectory();
+
+    /**
+     * @param configName The name of the config (and more generally of the software creating it).
      * @return A path of the config file that will be created.
      */
     @NotNull
-    protected Path makeConfigPath(Path configDir) {
-        return configDir.resolve(side.sideName() + ".json");
+    protected Path makeConfigPath(String configName) {
+        return getConfigDirectory().resolve(configName + '-' + side.sideName() + ".json");
     }
 
     /**
-     * @return The name of the ConfigWatcher thread.
+     * Methods that creates the config watcher and starts it.
+     * You can use this method to disable the config watcher simply by returning null.
+     * @return A ConfigWatcher instance or null if watching is disabled.
      */
-    @NotNull
-    protected abstract String watcherThreadName();
+    @Nullable
+    protected ConfigWatcher makeAndStartConfigWatcherThread() {
+        return new ConfigWatcher();
+    }
 
     /**
      * Inner class that is a thread itself and watches for changes in config.
      */
     protected class ConfigWatcher extends Thread {
-        private final Path file;
+        ConfigWatcher(String name) {
+            setName(name);
+            setDaemon(true);
+            start();
+        }
 
-        ConfigWatcher(Path file) {
-            this.file = file;
-            setName(watcherThreadName());
+        ConfigWatcher() {
             setDaemon(true);
             start();
         }
@@ -204,7 +217,7 @@ public abstract class CatConfig implements ConfigAccess {
         @Override
         public void run() {
             try(WatchService service = FileSystems.getDefault().newWatchService()) {
-                file.getParent().register(service, StandardWatchEventKinds.ENTRY_MODIFY);
+                configFilePath.getParent().register(service, StandardWatchEventKinds.ENTRY_MODIFY);
                 // We need this field because changes get detected two times: when file content is modified and when file metadata is modified.
                 // As the interval of detection of these events is very small, we can bypass it by checking the interval between the last detection and the current one.
                 long lastModified = 0;
@@ -217,9 +230,9 @@ public abstract class CatConfig implements ConfigAccess {
                             lastModified = 0;
                         }
                         else {
-                            if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY) && updated.equals(file.getFileName())) {
+                            if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY) && updated.equals(configFilePath.getFileName())) {
                                 readFromFile(true);
-                                lastModified = file.toFile().lastModified();
+                                lastModified = configFile.lastModified();
                             }
                         }
                     }
