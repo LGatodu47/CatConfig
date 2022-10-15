@@ -308,7 +308,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
                 Long min = min();
                 Long max = max();
 
-                long val = reader.nextInt();
+                long val = reader.nextLong();
                 if(min != null) {
                     val = Math.max(val, min);
                 }
@@ -334,7 +334,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
                 Double min = min();
                 Double max = max();
 
-                double val = reader.nextInt();
+                double val = reader.nextDouble();
                 if(min != null) {
                     val = Math.max(val, min);
                 }

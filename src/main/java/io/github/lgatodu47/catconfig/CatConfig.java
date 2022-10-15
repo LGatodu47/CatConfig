@@ -203,13 +203,13 @@ public abstract class CatConfig implements ConfigAccess {
      * Inner class that is a thread itself and watches for changes in config.
      */
     protected class ConfigWatcher extends Thread {
-        ConfigWatcher(String name) {
+        protected ConfigWatcher(String name) {
             setName(name);
             setDaemon(true);
             start();
         }
 
-        ConfigWatcher() {
+        protected ConfigWatcher() {
             setDaemon(true);
             start();
         }
