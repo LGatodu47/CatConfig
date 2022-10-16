@@ -78,7 +78,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created integer config option.
      */
-    ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max);
+    ConfigOption.NumberOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max);
 
     /**
      * @param sides The config sides of the config option to create.
@@ -88,7 +88,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created long config option.
      */
-    ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max);
+    ConfigOption.NumberOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max);
 
     /**
      * @param sides The config sides of the config option to create.
@@ -98,7 +98,7 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
      * @param max The maximum value (also inclusive) that this option can take.
      * @return A freshly new created double config option.
      */
-    ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max);
+    ConfigOption.NumberOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max);
 
     /**
      * @param sides The config sides of the config option to create.
@@ -132,39 +132,39 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
         return createBool(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue) {
+    default ConfigOption.NumberOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue) {
         return createInt(sides, name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
-    default ConfigOption<Integer> createInt(String name, @Nullable Integer defaultValue, int min, int max) {
+    default ConfigOption.NumberOption<Integer> createInt(String name, @Nullable Integer defaultValue, int min, int max) {
         return createInt(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
-    default ConfigOption<Integer> createInt(String name, @Nullable Integer defaultValue) {
+    default ConfigOption.NumberOption<Integer> createInt(String name, @Nullable Integer defaultValue) {
         return createInt(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue) {
+    default ConfigOption.NumberOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue) {
         return createLong(sides, name, defaultValue, Long.MIN_VALUE, Long.MAX_VALUE);
     }
 
-    default ConfigOption<Long> createLong(String name, @Nullable Long defaultValue, long min, long max) {
+    default ConfigOption.NumberOption<Long> createLong(String name, @Nullable Long defaultValue, long min, long max) {
         return createLong(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
-    default ConfigOption<Long> createLong(String name, @Nullable Long defaultValue) {
+    default ConfigOption.NumberOption<Long> createLong(String name, @Nullable Long defaultValue) {
         return createLong(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
-    default ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue) {
+    default ConfigOption.NumberOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue) {
         return createDouble(sides, name, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
-    default ConfigOption<Double> createDouble(String name, @Nullable Double defaultValue, double min, double max) {
+    default ConfigOption.NumberOption<Double> createDouble(String name, @Nullable Double defaultValue, double min, double max) {
         return createDouble(Objects.requireNonNull(currentSides()), name, defaultValue, min, max);
     }
 
-    default ConfigOption<Double> createDouble(String name, @Nullable Double defaultValue) {
+    default ConfigOption.NumberOption<Double> createDouble(String name, @Nullable Double defaultValue) {
         return createDouble(Objects.requireNonNull(currentSides()), name, defaultValue);
     }
 
@@ -219,17 +219,17 @@ public interface ConfigOptionBuilder extends ConfigOptionAccess {
         }
 
         @Override
-        public ConfigOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max) {
+        public ConfigOption.NumberOption<Integer> createInt(@NotNull ConfigSideArray sides, String name, @Nullable Integer defaultValue, int min, int max) {
             return put(sides, new IntOption(name, defaultValue, min, max));
         }
 
         @Override
-        public ConfigOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max) {
+        public ConfigOption.NumberOption<Long> createLong(@NotNull ConfigSideArray sides, String name, @Nullable Long defaultValue, long min, long max) {
             return put(sides, new LongOption(name, defaultValue, min, max));
         }
 
         @Override
-        public ConfigOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max) {
+        public ConfigOption.NumberOption<Double> createDouble(@NotNull ConfigSideArray sides, String name, @Nullable Double defaultValue, double min, double max) {
             return put(sides, new DoubleOption(name, defaultValue, min, max));
         }
 

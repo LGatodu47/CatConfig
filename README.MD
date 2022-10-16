@@ -9,7 +9,7 @@ Cat Config
 Cat Config is a Java library with a whole config system. To implement it in your project, you first need
 to obtain the artifacts located on the maven central repository or at
 `https://s01.oss.sonatype.org/content/repositories/releases`.
-You can find them at the domain `io.github.lgatodu47:cat-config`. Here is an example at what you would
+You can find them at the domain `io.github.lgatodu47:catconfig`. Here is an example at what you would
 have in your build.gradle:
 
     repositories {
@@ -19,7 +19,7 @@ have in your build.gradle:
     }
 
     dependencies {
-        implementation 'io.github.lgatodu47:catconfig:0.2.1'
+        implementation 'io.github.lgatodu47:catconfig:0.2.2'
     }
 
 One the library is included in your project, you will need to implement the class `CatConfig` in order to
@@ -45,9 +45,9 @@ public class MyConfig extends CatConfig {
 In this example, we specify a config side in the constructor. We pass down a name for our config
 ('my-config') and a default instance of CatConfigLogger named "My Config". You can also
 notice that two methods are implemented: `getConfigDirectory()` corresponds to the path leading to the
-directory where the config files will be created.
-The other method `getConfigOptions()` returns a `ConfigOptionAccess`, an object that allows accessing
-your config options. The `MyConfigOptions` class defines all the config options. Here is what it may
+directory where the config files will be created and `getConfigOptions()` which returns a
+`ConfigOptionAccess`, an object that allows accessing your config options.
+The `MyConfigOptions` class defines all the config options. Here is what it may
 look like based on the Javadoc of `ConfigOptionBuilder`:
 ```
 [...]

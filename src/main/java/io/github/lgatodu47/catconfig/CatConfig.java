@@ -146,6 +146,7 @@ public abstract class CatConfig implements ConfigAccess {
 
                     if (token.equals(JsonToken.NULL)) {
                         valueMap.put(option, null);
+                        reader.nextNull();
                     } else {
                         valueMap.readAndPut(reader, option);
                     }
@@ -203,13 +204,13 @@ public abstract class CatConfig implements ConfigAccess {
      * Inner class that is a thread itself and watches for changes in config.
      */
     protected class ConfigWatcher extends Thread {
-        protected ConfigWatcher(String name) {
+        public ConfigWatcher(String name) {
             setName(name);
             setDaemon(true);
             start();
         }
 
-        protected ConfigWatcher() {
+        public ConfigWatcher() {
             setDaemon(true);
             start();
         }
