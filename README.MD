@@ -19,7 +19,7 @@ have in your build.gradle:
     }
 
     dependencies {
-        implementation 'io.github.lgatodu47:catconfig:0.2.2'
+        implementation 'io.github.lgatodu47:catconfig:0.2.3'
     }
 
 One the library is included in your project, you will need to implement the class `CatConfig` in order to
