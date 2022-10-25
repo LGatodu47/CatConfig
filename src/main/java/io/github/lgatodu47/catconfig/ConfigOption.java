@@ -45,31 +45,19 @@ public interface ConfigOption<V> {
     V read(JsonReader reader) throws IOException;
 
     /**
-     * Writes the default value in the writer, or {@code null} if there is none.
-     *
-     * @param writer The Json writer in which the value is written.
-     * @throws IOException If there is an error while writing to the Json writer.
-     */
-    default void writeDefaultOrNull(JsonWriter writer) throws IOException {
-        V val = defaultValue();
-        if (val == null) {
-            writer.name(name());
-            writer.nullValue();
-        } else {
-            writeWithName(writer, val);
-        }
-    }
-
-    /**
      * Writes the name of this option followed by the given value to the writer.
      *
      * @param writer The Json writer in which the name and the value will be written.
      * @param value The value to write.
      * @throws IOException If there is an error when writing to the Json writer.
      */
-    default void writeWithName(JsonWriter writer, @NotNull V value) throws IOException {
+    default void writeWithName(JsonWriter writer, @Nullable V value) throws IOException {
         writer.name(name());
-        write(writer, value);
+        if(value == null) {
+            writer.nullValue();
+        } else {
+            write(writer, value);
+        }
     }
 
     /**

@@ -197,7 +197,9 @@ public abstract class CatConfig implements ConfigAccess {
      */
     @Nullable
     protected ConfigWatcher makeAndStartConfigWatcherThread() {
-        return new ConfigWatcher();
+        ConfigWatcher watcher = new ConfigWatcher();
+        watcher.start();
+        return watcher;
     }
 
     /**
@@ -205,14 +207,12 @@ public abstract class CatConfig implements ConfigAccess {
      */
     protected class ConfigWatcher extends Thread {
         public ConfigWatcher(String name) {
+            this();
             setName(name);
-            setDaemon(true);
-            start();
         }
 
         public ConfigWatcher() {
             setDaemon(true);
-            start();
         }
 
         @Override

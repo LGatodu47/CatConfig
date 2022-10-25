@@ -5,6 +5,8 @@ Cat Config
 
 ***
 
+If you wish to use this library with Minecraft for a Fabric mod development, you may want to use [Cat Config MC](https://github.com/LGatodu47/CatConfigMC).
+
 ### What is Cat Config ?
 Cat Config is a Java library with a whole config system. To implement it in your project, you first need
 to obtain the artifacts located on the maven central repository or at
@@ -19,7 +21,7 @@ have in your build.gradle:
     }
 
     dependencies {
-        implementation 'io.github.lgatodu47:catconfig:0.2.3'
+        implementation 'io.github.lgatodu47:catconfig:0.2.4'
     }
 
 One the library is included in your project, you will need to implement the class `CatConfig` in order to

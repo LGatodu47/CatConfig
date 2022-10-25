@@ -141,11 +141,7 @@ public interface ConfigValueMap {
             }
 
             private void write(JsonWriter writer) throws IOException {
-                if (value == null) {
-                    option.writeDefaultOrNull(writer);
-                } else {
-                    option.writeWithName(writer, value);
-                }
+                option.writeWithName(writer, value);
             }
         }
     }
